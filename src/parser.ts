@@ -11,24 +11,24 @@ export class Parser {
     public verbose = false;
 
     public async parse(url: string): Promise<Record<string, unknown[]>> {
-        this.verbose && console.time(`Fetch ${url}`);
+        this.time(`Fetch ${url}`);
         const res = await fetch(url);
-        this.verbose && console.timeEnd(`Fetch ${url}`);
+        this.time_end(`Fetch ${url}`);
 
-        this.verbose && console.time("Load DOM");
+        this.time("Load DOM");
         const html = await res.text();
         const dom = new JSDOM(html);
         const { document } = dom.window;
-        this.verbose && console.timeEnd("Load DOM");
+        this.time_end("Load DOM");
 
-        this.verbose && console.time("Indexing");
+        this.time("Indexing");
         const elements: Record<string, Element[]> = {};
         this.travel(document.body, "", elements);
-        this.verbose && console.timeEnd("Indexing");
+        this.time_end("Indexing");
 
-        this.verbose && console.time("Filtering");
+        this.time("Filtering");
         const filtered = this.filter(elements);
-        this.verbose && console.timeEnd("Filtering");
+        this.time_end("Filtering");
 
         this.verbose &&
             console.log(
@@ -47,7 +47,7 @@ export class Parser {
             this.verbose && console.log(`  - ${key} (${value.length})`);
         }
 
-        this.verbose && console.time("Constructing");
+        this.time("Constructing");
         const result: Record<string, unknown[]> = {};
         for (const [key, value] of Object.entries(filtered)) {
             const k = this.hash ? createHash("md5").update(key).digest("hex").substring(0, 7) : key;
@@ -69,7 +69,7 @@ export class Parser {
                 result[k] = v;
             }
         }
-        this.verbose && console.timeEnd("Constructing");
+        this.time_end("Constructing");
 
         return result;
     }
@@ -166,6 +166,14 @@ export class Parser {
         }
 
         return result;
+    }
+
+    private time(name: string): void {
+        this.verbose && console.time(name);
+    }
+
+    private time_end(name: string): void {
+        this.verbose && console.timeEnd(name);
     }
 }
 

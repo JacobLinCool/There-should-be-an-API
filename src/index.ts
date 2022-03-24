@@ -48,11 +48,13 @@ app.get("/", async (req, res) => {
         parser.hash = ["true", "1", "yes", "y"].includes(req.query.hash.toLowerCase());
     }
 
+    const time_start = Date.now();
     console.time(`Parsed Request "${req.query.url}"`);
     const result = await parser.parse(req.query.url);
     console.timeEnd(`Parsed Request "${req.query.url}"`);
+    const time_used = Date.now() - time_start;
 
-    res.json(result);
+    res.header("X-Parse-Time", time_used.toString()).json(result);
 });
 
 app.listen(3000, () => {
