@@ -7,7 +7,6 @@
     "license": "MIT",
     "keywords": [],
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
         "start": "esno src/index.ts",
         "cli": "esno src/cli.ts",
         "test": "jest --coverage",
