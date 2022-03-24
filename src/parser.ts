@@ -127,12 +127,9 @@ export class Parser {
 
     private extract_simple(element: Element): string {
         switch (element.tagName.toLowerCase()) {
-            case "a":
-                return this.preprocess((element as HTMLAnchorElement).href);
             case "img":
-                return this.preprocess((element as HTMLImageElement).src);
             case "script":
-                return this.preprocess((element as HTMLScriptElement).src);
+                return this.preprocess((element as HTMLImageElement).src);
             case "link":
                 return this.preprocess((element as HTMLLinkElement).href);
             default:
@@ -155,14 +152,14 @@ export class Parser {
             if (typeof value === "string") {
                 result[key] = str;
             } else {
-                result[key] = value;
+                result[value.name] = this.preprocess(value.value);
             }
         }
         if (
             (element.textContent?.length ?? 0) >= this.filter_rules.content_min &&
             (element.textContent?.length ?? 0) <= this.filter_rules.content_max
         ) {
-            result.textContent = element.textContent;
+            result.textContent = this.preprocess(element.textContent || "");
         }
 
         return result;
