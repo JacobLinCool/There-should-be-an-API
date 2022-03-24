@@ -113,11 +113,11 @@ export class Parser {
             }
             let parent = key;
             while (parent.match(/>/)) {
-                if (set.has(parent.replace(/>.*$/, ""))) {
+                if (set.has(parent.replace(/>[^>]*$/, ""))) {
                     delete result[parent];
                     break;
                 }
-                parent = parent.replace(/>.*$/, "");
+                parent = parent.replace(/>[^>]*$/, "");
             }
             set.add(key);
         }
