@@ -8,7 +8,7 @@ const app = Express();
 app.get("/", async (req, res) => {
     console.log("Request Received", req.query);
     if (!req.query?.url || typeof req.query.url !== "string") {
-        res.status(400).json({ error: "?url= is required", WELCOME_MESSAGE });
+        res.status(400).json({ error: `"url" is required`, WELCOME_MESSAGE });
         return;
     }
 
@@ -48,13 +48,18 @@ app.get("/", async (req, res) => {
         parser.hash = ["true", "1", "yes", "y"].includes(req.query.hash.toLowerCase());
     }
 
-    const time_start = Date.now();
-    console.time(`Parsed Request "${req.query.url}"`);
-    const result = await parser.parse(req.query.url);
-    console.timeEnd(`Parsed Request "${req.query.url}"`);
-    const time_used = Date.now() - time_start;
+    try {
+        const time_start = Date.now();
+        console.time(`Parsed Request "${req.query.url}"`);
+        const result = await parser.parse(req.query.url);
+        console.timeEnd(`Parsed Request "${req.query.url}"`);
+        const time_used = Date.now() - time_start;
 
-    res.header("X-Parse-Time", time_used.toString()).json(result);
+        res.header("X-Parse-Time", time_used.toString()).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: (err as Error).message });
+    }
 });
 
 app.listen(3000, () => {
