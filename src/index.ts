@@ -1,26 +1,39 @@
 import Express from "express";
+import { Truthy } from "./constants";
 import { Parser } from "./parser";
 
-const WELCOME_MESSAGE = `Welcome to demo of "There should be an API"! See https://github.com/JacobLinCool/There-should-be-an-API for more information.`;
+const MESSAGE = {
+    WELCOME: `Welcome to the demo of "There should be an API"!`,
+    SEE: `See https://github.com/JacobLinCool/There-should-be-an-API for more information.`,
+};
 
 const app = Express();
 
 app.get("/", async (req, res) => {
     console.log("Request Received", req.query);
     if (!req.query?.url || typeof req.query.url !== "string") {
-        res.status(400).json({ error: `"url" is required`, WELCOME_MESSAGE });
+        res.status(400).json({ error: `"url" is required`, ...MESSAGE });
         return;
     }
 
     try {
         new URL(req.query.url);
     } catch {
-        res.status(400).json({ error: "Invalid url", WELCOME_MESSAGE });
+        res.status(400).json({ error: "Invalid url", ...MESSAGE });
         return;
     }
 
     const parser = new Parser();
 
+    if (req.query.mode && typeof req.query.mode === "string") {
+        parser.mode = req.query.mode === "full" ? "full" : "simple";
+    }
+    if (req.query.hash && typeof req.query.hash === "string") {
+        parser.hash = Truthy.includes(req.query.hash.toLowerCase());
+    }
+    if (req.query.check_class && typeof req.query.check_class === "string") {
+        parser.travel_rules.check_class = Truthy.includes(req.query.check_class.toLowerCase());
+    }
     if (req.query.max && typeof req.query.max === "string" && parseInt(req.query.max)) {
         parser.filter_rules.max = parseInt(req.query.max);
     }
@@ -40,12 +53,6 @@ app.get("/", async (req, res) => {
         parseInt(req.query.content_min)
     ) {
         parser.filter_rules.content_min = parseInt(req.query.content_min);
-    }
-    if (req.query.mode && typeof req.query.mode === "string") {
-        parser.mode = req.query.mode === "full" ? "full" : "simple";
-    }
-    if (req.query.hash && typeof req.query.hash === "string") {
-        parser.hash = ["true", "1", "yes", "y"].includes(req.query.hash.toLowerCase());
     }
 
     try {
